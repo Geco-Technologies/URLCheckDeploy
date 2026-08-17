@@ -3272,19 +3272,91 @@ if (window.checkExtensionLoaded) {
   //
   // Catches phishing pages that have NO Microsoft branding by combining two
   // independent signals: suspicious URL structure + credential input form.
-  // Either signal alone is too noisy; together they are high-confidence.
+  // URL suspicion is required before form / anti-analysis points can block —
+  // otherwise every legitimate SSO, bank, and corporate login is a false positive.
   //
   // Typical target:
   //   https://tpio-mail-internalserver.zenviq.vu/?id=CJbjp7Snv90lH5Cy...
   //   ↑ mail/server keywords in subdomain + long spear-phishing tracking ID
   //   ↑ combined with a password field on the page = credential harvest
 
+  // Query params used by OAuth, OIDC, SAML, WS-Fed and similar SSO flows.
+  // Their values are routinely 40+ chars of base64url and must not be treated
+  // as spear-phishing tracking IDs.
+  const GENERIC_SSO_QUERY_PARAMS = new Set([
+    'code', 'state', 'nonce', 'token', 'id_token', 'access_token', 'refresh_token',
+    'session_state', 'sessionid', 'session', 'sid', 'jwt', 'assertion',
+    'client_id', 'redirect', 'redirect_uri', 'request', 'request_uri',
+    'samlrequest', 'samlresponse', 'relaystate', 'wresult', 'wctx', 'wa',
+    'scope', 'response', 'error', 'error_description', 'iss', 'aud', 'sub',
+    'challenge', 'verifier', 'code_challenge', 'code_verifier',
+    'fromuri', 'returl', 'returnurl', 'return_to', 'continue', 'target', 'next',
+    'callback', 'postback', 'ticket', 'payload', 'data', 'hash', 'hmac',
+    'signature', 'sig', 'csrf', 'xsrf', 'context', 'authorization', 'auth',
+    'access', 'idtoken', 'accesstoken', 'response_type', 'response_mode',
+    'prompt', 'login_hint', 'domain_hint', 'resource', 'nonce_token',
+  ]);
+
+  // Known identity providers. Generic harvesting is the wrong detector here —
+  // Microsoft impersonation rules still run if the page mimics M365.
+  const KNOWN_IDP_HOST_SUFFIXES = [
+    'okta.com', 'okta-emea.com', 'oktapreview.com', 'okta-gov.com',
+    'pingidentity.com', 'pingone.com', 'ping-eng.com',
+    'onelogin.com',
+    'duosecurity.com', 'duo.com',
+    'jumpcloud.com',
+    'auth0.com',
+    'salesforce.com', 'force.com',
+    'login.gov',
+    'amazoncognito.com',
+    'cloudflareaccess.com',
+    'forgerock.com',
+    'cyberark.com', 'idaptive.app',
+    'docusign.com',
+    'lastpass.com', '1password.com', 'bitwarden.com', 'dashlane.com',
+    'keepersecurity.com',
+    'servicenow.com',
+    'atlassian.com',
+  ];
+
+  function isKnownIdentityProviderHost(hostname) {
+    const host = (hostname || '').toLowerCase();
+    return KNOWN_IDP_HOST_SUFFIXES.some(
+      (suffix) => host === suffix || host.endsWith('.' + suffix)
+    );
+  }
+
+  function hostnameHasKeywordToken(hostname, keyword) {
+    const labels = hostname.split('.');
+    for (const label of labels) {
+      if (label === keyword) return true;
+      const parts = label.split('-');
+      if (parts.includes(keyword)) return true;
+    }
+    return false;
+  }
+
+  function hasSpearPhishingTrackingId(search) {
+    if (!search) return false;
+    const pattern = /[?&]([a-z_-]{1,8})=([A-Za-z0-9_\-]{40,})/gi;
+    let match;
+    while ((match = pattern.exec(search)) !== null) {
+      const name = match[1].toLowerCase();
+      if (!GENERIC_SSO_QUERY_PARAMS.has(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Score a URL for generic phishing signals.
    * Returns { score, reasons[] }
-   *  score >= 70 + password form → block
-   *  score >= 40 + password form → warn
-   *  score >= 90 (URL alone)    → warn (form may load dynamically)
+   *
+   * Blocking requires URL suspicion first:
+   *  urlScore >= 40 AND password form AND total >= 90 → block
+   *  urlScore >= 90 (URL alone) → block (multi-step kits)
+   *  urlScore >= 40 AND password form AND total >= 70 → warn
    */
   function scoreGenericPhishingUrl(url) {
     let score = 0;
@@ -3293,30 +3365,27 @@ if (window.checkExtensionLoaded) {
     try {
       const parsed   = new URL(url);
       const hostname = parsed.hostname.toLowerCase();
-      const search   = parsed.search.toLowerCase();
-      const subdomain = hostname.split('.').slice(0, -2).join('.');
 
       // ── High-value URL signals ──────────────────────────────────────────
 
       // Long base64url tracking ID — hallmark of spear-phishing kits that
-      // personalise each link per target.  Legitimate tracking params are
-      // rarely > 40 chars of pure base64url characters.
-      const longIdPattern = /[?&][a-z_-]{1,8}=[A-Za-z0-9_\-]{40,}/;
-      if (longIdPattern.test(parsed.search)) {
+      // personalise each link per target. Ignore SSO protocol parameters.
+      if (hasSpearPhishingTrackingId(parsed.search)) {
         score += 50;
         reasons.push('Long base64url tracking ID in query string (spear-phishing indicator)');
       }
 
-      // Corporate / mail-related keywords in the subdomain/hostname portion
+      // Corporate / mail-related keywords as hostname *tokens*, not substrings.
+      // Substring matching treated gmail/email as "mail" and oauth as "auth".
       const CORPORATE_KEYWORDS = [
-        'mail', 'webmail', 'mailserver', 'internalserver', 'internal-server',
+        'mail', 'webmail', 'mailserver', 'internalserver',
         'secure', 'login', 'signin', 'auth', 'account', 'accounts',
-        'outlook', 'office365', 'office-365', 'sharepoint', 'onedrive',
-        'teams', 'microsoft', 'msoffice', 'helpdesk', 'support-portal',
+        'outlook', 'office365', 'sharepoint', 'onedrive',
+        'teams', 'microsoft', 'msoffice', 'helpdesk',
       ];
       let kwCount = 0;
       for (const kw of CORPORATE_KEYWORDS) {
-        if (subdomain.includes(kw) || (kwCount === 0 && hostname.includes(kw))) {
+        if (hostnameHasKeywordToken(hostname, kw)) {
           score += 20;
           reasons.push(`Corporate keyword "${kw}" in hostname`);
           if (++kwCount >= 3) break; // cap at 3 keywords worth of points
@@ -3334,23 +3403,24 @@ if (window.checkExtensionLoaded) {
         reasons.push(`${hyphenCount} hyphens in hostname`);
       }
 
-      // Unusual / rarely-legitimate TLD combined with corporate keywords
+      // Classic free/abusive phishing TLDs vs common commercial TLDs that
+      // legitimate companies also use (.tech, .online, .site, etc.).
       const tld = hostname.split('.').pop();
-      const UNCOMMON_PHISHING_TLDS = new Set([
-        'vu','tk','ml','ga','cf','gq','pw','top','xyz','club','online',
-        'site','website','tech','icu','buzz','cyou','mom','sbs','lol',
+      const FREE_PHISHING_TLDS = new Set(['vu','tk','ml','ga','cf','gq','pw']);
+      const WEAK_UNCOMMON_TLDS = new Set([
+        'top','xyz','club','online','site','website','tech','icu','buzz',
+        'cyou','mom','sbs','lol',
       ]);
-      if (UNCOMMON_PHISHING_TLDS.has(tld) && kwCount > 0) {
+      if (FREE_PHISHING_TLDS.has(tld) && kwCount > 0) {
         score += 15;
         reasons.push(`Uncommon TLD ".${tld}" with corporate keywords`);
+      } else if (WEAK_UNCOMMON_TLDS.has(tld) && kwCount >= 2) {
+        score += 15;
+        reasons.push(`Uncommon TLD ".${tld}" with multiple corporate keywords`);
       }
 
-      // URL path contains login-related segments
-      const pathLower = parsed.pathname.toLowerCase();
-      if (/\/(login|signin|auth|oauth|verify|validate|confirm|secure)/.test(pathLower)) {
-        score += 10;
-        reasons.push('Login/auth keyword in URL path');
-      }
+      // Do not score /login|/auth|/oauth path segments. Almost every real
+      // SSO page uses them, so they drown legitimate sign-in pages.
 
     } catch (_) { /* malformed URL — score stays 0 */ }
 
@@ -3359,9 +3429,10 @@ if (window.checkExtensionLoaded) {
 
   /**
    * Detect anti-analysis / anti-debugging techniques used by phishing kits.
-   * These are run at document_idle against the live DOM and return scored signals.
-   * Legitimate pages never need to block right-click, keyboard shortcuts, or
-   * text selection — any of these on a suspicious URL is high-confidence phishing.
+   * Only call this when the URL is already suspicious. Dispatching fake
+   * contextmenu / keydown / copy events on every login page is both a
+   * false-positive source (banks, SSO, and enterprise apps routinely
+   * preventDefault these) and a side-effect on legitimate page JS.
    */
   function detectDomAntiAnalysis() {
     const signals = [];
@@ -3370,42 +3441,25 @@ if (window.checkExtensionLoaded) {
       const target = document.body || document.documentElement;
       if (!target) return signals;
 
-      // ── Right-click / context menu blocking ─────────────────────────────
-      // Dispatch a fake contextmenu event — if the page calls preventDefault
-      // the event will come back as defaultPrevented.
-      const ctxEvt = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
-      target.dispatchEvent(ctxEvt);
-      if (ctxEvt.defaultPrevented) {
-        signals.push({ score: 35, desc: 'Right-click (context menu) blocked — anti-analysis' });
-      }
-      // Also check for inline HTML attributes
-      if (!ctxEvt.defaultPrevented &&
-          document.querySelector('[oncontextmenu]')) {
-        signals.push({ score: 35, desc: 'Right-click blocked via oncontextmenu attribute — anti-analysis' });
+      // Prefer static attributes over dispatching events. Event dispatch is
+      // a last resort and still only used on URL-suspicious pages.
+      if (document.querySelector('[oncontextmenu]')) {
+        signals.push({ score: 20, desc: 'Right-click blocked via oncontextmenu attribute — anti-analysis' });
+      } else {
+        const ctxEvt = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+        target.dispatchEvent(ctxEvt);
+        if (ctxEvt.defaultPrevented) {
+          signals.push({ score: 20, desc: 'Right-click (context menu) blocked — anti-analysis' });
+        }
       }
 
-      // ── Keyboard shortcut blocking (F12 / DevTools) ──────────────────────
       const f12Evt = new KeyboardEvent('keydown', {
         key: 'F12', keyCode: 123, code: 'F12',
         bubbles: true, cancelable: true,
       });
       target.dispatchEvent(f12Evt);
       if (f12Evt.defaultPrevented) {
-        signals.push({ score: 25, desc: 'F12 / developer shortcut key blocked — anti-analysis' });
-      }
-
-      // ── Text selection blocking ──────────────────────────────────────────
-      const selEvt = new Event('selectstart', { bubbles: true, cancelable: true });
-      target.dispatchEvent(selEvt);
-      if (selEvt.defaultPrevented) {
-        signals.push({ score: 20, desc: 'Text selection blocked — anti-analysis' });
-      }
-
-      // ── Copy blocking ────────────────────────────────────────────────────
-      const copyEvt = new ClipboardEvent('copy', { bubbles: true, cancelable: true });
-      target.dispatchEvent(copyEvt);
-      if (copyEvt.defaultPrevented) {
-        signals.push({ score: 15, desc: 'Copy blocked — anti-analysis' });
+        signals.push({ score: 15, desc: 'F12 / developer shortcut key blocked — anti-analysis' });
       }
 
     } catch (_) { /* DOM not ready or unexpected error — skip */ }
@@ -3449,44 +3503,59 @@ if (window.checkExtensionLoaded) {
   }
 
   /**
-   * Combined generic phishing check.  Runs on ALL non-trusted, non-MS pages.
+   * Combined generic phishing check.  Runs on non-trusted, non-MS pages.
    * Returns { blocked, warned, score, reasons } so the caller can decide action.
+   *
+   * Form fields, external POST actions, and anti-analysis behaviour are
+   * normal on real login pages. They may only amplify a verdict when the
+   * URL itself already looks like phishing (urlScore >= 40).
    */
   function checkGenericCredentialHarvesting() {
     const url = window.location.href;
+    let hostname = '';
+    try {
+      hostname = new URL(url).hostname.toLowerCase();
+    } catch (_) {
+      return { blocked: false, warned: false, score: 0, urlScore: 0, reasons: [], form: detectCredentialForm() };
+    }
+
+    if (isKnownIdentityProviderHost(hostname)) {
+      return { blocked: false, warned: false, score: 0, urlScore: 0, reasons: ['known identity provider'], form: { hasPasswordField: false, hasEmailField: false, formPostsExternally: false } };
+    }
+
     const { score, reasons } = scoreGenericPhishingUrl(url);
-    const form        = detectCredentialForm();
-    const antiAnalysis = detectDomAntiAnalysis();
+    const form = detectCredentialForm();
     const earlySignals = window.__checkAntiAnalysis || { signals: [], score: 0 };
 
-    // Combine URL score with form, anti-analysis (DOM), and early-script signals
     let totalScore = score;
-    if (form.hasPasswordField)    totalScore += 40;
-    if (form.hasEmailField)       totalScore += 20;
-    if (form.formPostsExternally) totalScore += 30;
+    if (form.hasPasswordField) totalScore += 40;
+    if (form.hasEmailField)    totalScore += 20;
 
-    for (const sig of antiAnalysis) {
-      totalScore += sig.score;
-      reasons.push(sig.desc);
+    // External form POST is how SSO works. Only count it on already-suspicious URLs.
+    if (form.formPostsExternally && score >= 40) {
+      totalScore += 15;
     }
-    if (earlySignals.score > 0) {
-      totalScore += earlySignals.score;
-      for (const sig of earlySignals.signals) {
-        reasons.push(sig.desc || `Anti-analysis: ${sig.type}`);
+
+    if (score >= 40) {
+      const antiAnalysis = detectDomAntiAnalysis();
+      for (const sig of antiAnalysis) {
+        totalScore += sig.score;
+        reasons.push(sig.desc);
+      }
+      if (earlySignals.score > 0) {
+        totalScore += earlySignals.score;
+        for (const sig of earlySignals.signals) {
+          reasons.push(sig.desc || `Anti-analysis: ${sig.type}`);
+        }
       }
     }
 
     const hasForm = form.hasPasswordField;
 
-    // Block if:
-    //  a) Password form present + combined score high (classic credential harvest)
-    //  b) URL score alone is very high — catches multi-step phishing flows where
-    //     the first page has no password field (e.g. "verify your email" → password next)
-    //     A score of 90+ from URL signals alone requires multiple strong indicators
-    //     (e.g. long spear-phishing ID + mail keyword + unusual TLD) so false-positive
-    //     risk is extremely low.
-    const blocked = (hasForm && totalScore >= 90) || score >= 90;
-    const warned  = !blocked && (hasForm && totalScore >= 50);
+    // Never block a page whose URL does not look like phishing. A password
+    // field plus right-click suppression is a normal bank / SSO login page.
+    const blocked = (hasForm && score >= 40 && totalScore >= 90) || score >= 90;
+    const warned  = !blocked && hasForm && score >= 40 && totalScore >= 70;
 
     if (blocked || warned) {
       const trigger = blocked

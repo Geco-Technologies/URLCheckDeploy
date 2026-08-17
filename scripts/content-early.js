@@ -14,21 +14,64 @@
  *
  * This script only activates when the URL already looks suspicious
  * (quick subset score ≥ 40) to avoid any overhead on legitimate pages.
+ * Wrapping fetch / XHR / setInterval on real SSO logins breaks those pages.
  */
 
 (function () {
   'use strict';
+
+  const SSO_QUERY_PARAMS = new Set([
+    'code', 'state', 'nonce', 'token', 'id_token', 'access_token', 'refresh_token',
+    'session_state', 'sessionid', 'session', 'sid', 'jwt', 'assertion',
+    'client_id', 'redirect', 'redirect_uri', 'request', 'request_uri',
+    'samlrequest', 'samlresponse', 'relaystate', 'wresult', 'wctx', 'wa',
+    'scope', 'response', 'error', 'error_description', 'iss', 'aud', 'sub',
+    'challenge', 'verifier', 'code_challenge', 'code_verifier',
+    'fromuri', 'returl', 'returnurl', 'return_to', 'continue', 'target', 'next',
+    'callback', 'postback', 'ticket', 'payload', 'data', 'hash', 'hmac',
+    'signature', 'sig', 'csrf', 'xsrf', 'context', 'authorization', 'auth',
+    'access', 'idtoken', 'accesstoken', 'response_type', 'response_mode',
+    'prompt', 'login_hint', 'domain_hint', 'resource',
+  ]);
+
+  function hostnameHasKeywordToken(hostname, keyword) {
+    const labels = hostname.split('.');
+    for (const label of labels) {
+      if (label === keyword) return true;
+      if (label.split('-').includes(keyword)) return true;
+    }
+    return false;
+  }
+
+  function hasSpearPhishingTrackingId(search) {
+    if (!search) return false;
+    const pattern = /[?&]([a-z_-]{1,8})=([A-Za-z0-9_\-]{40,})/gi;
+    let match;
+    while ((match = pattern.exec(search)) !== null) {
+      if (!SSO_QUERY_PARAMS.has(match[1].toLowerCase())) return true;
+    }
+    return false;
+  }
 
   // ── Quick URL suspiciousness pre-check ──────────────────────────────────
   // Mirror of the key signals from scoreGenericPhishingUrl — kept minimal
   // so this runs in < 1ms on every page load.
   function quickUrlScore() {
     try {
-      const parsed   = new URL(window.location.href);
-      const subdomain = parsed.hostname.split('.').slice(0, -2).join('.');
+      const parsed = new URL(window.location.href);
+      const hostname = parsed.hostname.toLowerCase();
       let s = 0;
-      if (/[?&][a-z_-]{1,8}=[A-Za-z0-9_\-]{40,}/.test(parsed.search)) s += 50;
-      if (/mail|login|auth|secure|webmail|internalserver|signin|account/.test(subdomain)) s += 20;
+      if (hasSpearPhishingTrackingId(parsed.search)) s += 50;
+      if (hostnameHasKeywordToken(hostname, 'mail') ||
+          hostnameHasKeywordToken(hostname, 'login') ||
+          hostnameHasKeywordToken(hostname, 'auth') ||
+          hostnameHasKeywordToken(hostname, 'secure') ||
+          hostnameHasKeywordToken(hostname, 'webmail') ||
+          hostnameHasKeywordToken(hostname, 'internalserver') ||
+          hostnameHasKeywordToken(hostname, 'signin') ||
+          hostnameHasKeywordToken(hostname, 'account')) {
+        s += 20;
+      }
       return s;
     } catch (_) { return 0; }
   }
