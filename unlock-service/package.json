@@ -1,0 +1,21 @@
+{
+  "name": "urlcheck-unlock-service",
+  "version": "1.0.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/run-tests.mjs",
+    "dev": "wrangler dev --local",
+    "deploy:staging": "wrangler deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^4.86.0"
+  },
+  "private": true
+}

@@ -1,0 +1,26 @@
+name = "urlcheck-unlock-staging"
+main = "src/index.js"
+compatibility_date = "2026-05-01"
+workers_dev = true
+# Staging only: no custom route. Production hostname is a Zack decision.
+
+[vars]
+ENVIRONMENT = "staging"
+# Cloudflare Access (Zero Trust) team domain + application AUD tag for the /admin app.
+# Fill these after the Access application is created (see DEPLOY.md). Until set, /admin returns 503.
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
+# Comma-separated allowed issuer email domains (defence in depth on top of the Access policy).
+ALLOWED_ISSUER_DOMAINS = "unite-networks.com"
+CODE_TTL_MINUTES = "15"
+DEFAULT_GRANT_TTL_SECONDS = "14400"
+MAX_GRANT_TTL_SECONDS = "28800"
+EXTENSION_ID = "ekiejhjpombecjiogemccfefgcpabmak"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "urlcheck-unlock-staging"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced at deploy (wrangler d1 create)
+migrations_dir = "migrations"
+
+# Secret (wrangler secret put UNLOCK_PEPPER): 32+ random bytes, hex. Never commit.
