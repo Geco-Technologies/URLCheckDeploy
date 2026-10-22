@@ -1,0 +1,10 @@
+=== 1.3.1
+hubspot_real           BLOCKED chrome-extension://pamonpmiccmipbaajobddlnmefhmgigk/blocked.html?url=http%3A%2F%2Fapp.cosec.e2e.test%3A18765%2
+hubspot_fake_hsenc     BLOCKED chrome-extension://pamonpmiccmipbaajobddlnmefhmgigk/blocked.html?url=http%3A%2F%2Fapp.cosec.e2e.test%3A18765%2
+spear_id               BLOCKED chrome-extension://pamonpmiccmipbaajobddlnmefhmgigk/blocked.html?url=http%3A%2F%2Fapp.cosec.e2e.test%3A18765%2
+clean                  open    http://app.cosec.e2e.test:18765/firstorder.php?utm_medium=email
+=== 1.3.2
+hubspot_real           open    http://app.cosec.e2e.test:18766/firstorder.php?utm_medium=email&_hsenc=p2ANqtz-8xYz3kQwErTyUiOpAsDfGhJkLzXcVbN
+hubspot_fake_hsenc     BLOCKED chrome-extension://hhkkbefdcedmbpnndegcdhelleobbgde/blocked.html?url=http%3A%2F%2Fapp.cosec.e2e.test%3A18766%2
+spear_id               BLOCKED chrome-extension://hhkkbefdcedmbpnndegcdhelleobbgde/blocked.html?url=http%3A%2F%2Fapp.cosec.e2e.test%3A18766%2
+clean                  open    http://app.cosec.e2e.test:18766/firstorder.php?utm_medium=email
