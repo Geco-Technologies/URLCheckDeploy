@@ -1,5 +1,10 @@
 /**
- * Unlock Code Manager — Phase 1b Option A
+ * Unlock Code Manager — Phase 1b Option A (+ Option B online validation)
+ *
+ * unlockValidationMode = "geco_endpoint" + unlockEndpointUrl (https): codes are
+ * validated online by the Unite unlock service (fleet-wide single use, revocable,
+ * audited). If the service is unreachable or rejects the code, the offline
+ * policy_list entries (Option A) are still tried.
  *
  * Helpdesk-issued unlock codes stored as salted SHA-256 hashes in managed
  * policy (unlockCodeEntries). Origin-bound, single-use on redeem, temporary
@@ -11,6 +16,9 @@ import logger from "../utils/logger.js";
 const STORAGE_GRANTS = "unlockGrants";
 const STORAGE_CONSUMED = "unlockConsumedCodeIds";
 const STORAGE_ATTEMPTS = "unlockAttemptState";
+const STORAGE_DEVICE_ID = "unlockDeviceId";
+const ONLINE_TIMEOUT_MS = 8000;
+const MAX_ONLINE_GRANT_SECONDS = 28800; // 8h hard cap regardless of server reply
 
 const DEFAULT_TTL_SECONDS = 14400; // 4 hours
 const DEFAULT_MAX_ATTEMPTS = 5;
@@ -82,6 +90,14 @@ export class UnlockCodeManager {
         Number(config.unlockAttemptWindowSeconds) > 0
           ? Number(config.unlockAttemptWindowSeconds)
           : DEFAULT_ATTEMPT_WINDOW_SECONDS,
+      // Online endpoint is honoured ONLY from enterprise (managed) policy, never from
+      // local/options storage, so a user cannot point it at a self-minting server.
+      unlockEndpointUrl:
+        typeof this.configManager?.enterpriseConfig?.unlockEndpointUrl === "string"
+          ? this.configManager.enterpriseConfig.unlockEndpointUrl.trim()
+          : "",
+      unlockDeviceLabel:
+        typeof config.unlockDeviceLabel === "string" ? config.unlockDeviceLabel.trim().slice(0, 64) : "",
       unlockHelpdeskMessage:
         typeof config.unlockHelpdeskMessage === "string" &&
         config.unlockHelpdeskMessage.trim()
@@ -222,14 +238,6 @@ export class UnlockCodeManager {
         ...base,
       };
     }
-    if (flags.unlockValidationMode === "geco_endpoint") {
-      return {
-        ok: false,
-        result: "feature_disabled",
-        message: "Online unlock validation is not available. Contact helpdesk.",
-        ...base,
-      };
-    }
     if (await this.isRateLimited(origin, flags)) {
       return {
         ok: false,
@@ -249,6 +257,23 @@ export class UnlockCodeManager {
         message: "Invalid unlock code.",
         ...base,
       };
+    }
+
+    let online = null;
+    if (flags.unlockValidationMode === "geco_endpoint") {
+      online = await this.redeemOnline({ flags, origin, url, normalized });
+      if (online.ok) {
+        await this.clearFailures(origin);
+        return online;
+      }
+      if (online.result === "rate_limited") {
+        return { ...base, ...online };
+      }
+      // Rejected or unreachable: fall through to offline Option A entries.
+      if (!flags.unlockCodeEntries.length) {
+        if (online.result !== "unavailable") await this.recordFailure(origin);
+        return { ...base, ...online, ok: false };
+      }
     }
 
     let matched = null;
@@ -306,6 +331,9 @@ export class UnlockCodeManager {
 
     if (!matched) {
       await this.recordFailure(origin);
+      if (online && online.result && online.result !== "unavailable") {
+        return { ...base, ...online, ok: false };
+      }
       return {
         ok: false,
         result: "invalid",
@@ -341,6 +369,109 @@ export class UnlockCodeManager {
       origin,
       url,
       codeId: matched.codeId || null,
+      expiresAt: grant.expiresAt,
+      unlockTtlSeconds: ttl,
+      navigateTo: url,
+    };
+  }
+  async getDeviceId() {
+    const data = await chrome.storage.local.get([STORAGE_DEVICE_ID]);
+    let id = data[STORAGE_DEVICE_ID];
+    if (!id || typeof id !== "string") {
+      id = crypto.randomUUID();
+      await chrome.storage.local.set({ [STORAGE_DEVICE_ID]: id });
+    }
+    return id;
+  }
+
+  static isAllowedEndpoint(u) {
+    try {
+      const p = new URL(u);
+      return p.protocol === "https:" && !p.username && !p.password;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /**
+   * Option B: validate + consume the code on the Unite unlock service.
+   * Returns { ok, result, message, ... }; result "unavailable" = could not reach / use the service.
+   */
+  async redeemOnline({ flags, origin, url, normalized }) {
+    const unavailable = {
+      ok: false,
+      result: "unavailable",
+      message: "Online unlock validation is unavailable right now. Contact Unite helpdesk.",
+    };
+    if (!UnlockCodeManager.isAllowedEndpoint(flags.unlockEndpointUrl)) return unavailable;
+    let resp;
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), ONLINE_TIMEOUT_MS);
+    try {
+      resp = await fetch(flags.unlockEndpointUrl, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          code: normalized,
+          origin,
+          url: url || null,
+          deviceId: await this.getDeviceId(),
+          deviceLabel: flags.unlockDeviceLabel || null,
+          extVersion: chrome.runtime?.getManifest?.().version || null,
+        }),
+        signal: ctl.signal,
+        credentials: "omit",
+        cache: "no-store",
+        redirect: "error",
+      });
+    } catch (e) {
+      logger.warn("Online unlock validation unreachable:", e?.name || e);
+      return unavailable;
+    } finally {
+      clearTimeout(timer);
+    }
+    let body = null;
+    try {
+      body = await resp.json();
+    } catch (_) {
+      return unavailable;
+    }
+    if (resp.status === 429 || body?.result === "rate_limited") {
+      return {
+        ok: false,
+        result: "rate_limited",
+        message: body?.message || "Too many incorrect attempts. Contact Unite helpdesk and try again later.",
+      };
+    }
+    if (resp.status >= 500 || !body || typeof body.ok !== "boolean") return unavailable;
+    if (!body.ok) {
+      const known = ["invalid", "used", "expired", "revoked", "wrong_origin"];
+      const result = known.includes(body.result) ? body.result : "invalid";
+      return {
+        ok: false,
+        result,
+        message: typeof body.message === "string" ? body.message.slice(0, 200) : "Invalid unlock code.",
+        codeId: body.codeId || null,
+      };
+    }
+    // Success must be for exactly this origin.
+    if (UnlockCodeManager.normalizeOrigin(body.origin) !== origin) {
+      return { ok: false, result: "wrong_origin", message: "This unlock code is not valid for this site." };
+    }
+    const ttl = Math.min(
+      Number(body.unlockTtlSeconds) > 0 ? Number(body.unlockTtlSeconds) : flags.unlockDefaultTtlSeconds,
+      MAX_ONLINE_GRANT_SECONDS
+    );
+    const grant = await this.writeGrant(origin, { ttlSeconds: ttl, codeId: body.codeId || null, source: "online" });
+    logger.log(`Unlock granted (online) for ${origin} until ${new Date(grant.expiresAt).toISOString()} (codeId=${body.codeId || "n/a"}, ticket=${body.ticket || "n/a"})`);
+    return {
+      ok: true,
+      result: "success",
+      message: "Site unlocked temporarily.",
+      origin,
+      url,
+      codeId: body.codeId || null,
+      ticket: body.ticket || null,
       expiresAt: grant.expiresAt,
       unlockTtlSeconds: ttl,
       navigateTo: url,

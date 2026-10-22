@@ -128,7 +128,7 @@
         },
         "authorizationHeader": {
           "title": "Authorization Header",
-          "description": "Full Authorization header value e.g. \"Bearer …\" (or empty)",
+          "description": "Full Authorization header value e.g. \"Bearer \u2026\" (or empty)",
           "type": "string",
           "default": ""
         },
@@ -313,7 +313,7 @@
     },
     "unlockValidationMode": {
       "title": "Unlock Validation Mode",
-      "description": "policy_list = offline hash check against unlockCodeEntries; geco_endpoint = reserved; off = disabled.",
+      "description": "policy_list = offline hash check against unlockCodeEntries; geco_endpoint = validate online at unlockEndpointUrl (Unite unlock service: fleet-wide single use, revocable, audited), falling back to unlockCodeEntries if the service is unreachable or rejects the code; off = disabled.",
       "type": "string",
       "enum": [
         "policy_list",
@@ -363,6 +363,18 @@
         }
       },
       "default": []
+    },
+    "unlockEndpointUrl": {
+      "title": "Online Unlock Validation URL",
+      "description": "HTTPS URL of the Unite unlock service redeem endpoint (e.g. https://<host>/v1/unlock/redeem). Used when unlockValidationMode = geco_endpoint.",
+      "type": "string",
+      "default": ""
+    },
+    "unlockDeviceLabel": {
+      "title": "Device Label for Unlock Audit",
+      "description": "Optional device name (e.g. computer name) sent with online unlock redemptions for the audit log.",
+      "type": "string",
+      "default": ""
     },
     "unlockDefaultTtlSeconds": {
       "title": "Default Unlock Grant TTL (seconds)",

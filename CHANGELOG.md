@@ -1,3 +1,8 @@
+## 1.4.0 (branch feature/online-unlock, unreleased) - 2026-10-22
+- Unlock codes Option B: `unlockValidationMode = geco_endpoint` + managed `unlockEndpointUrl` (https only, honoured ONLY from managed policy) validates codes online with the Unite unlock service (fleet-wide single use, revocable, audited, ticket-bound). Sends normalised code, origin, URL, a per-profile random deviceId, optional managed `unlockDeviceLabel`, extension version. 8 s timeout; grant TTL capped at 8 h; server success must name the same origin.
+- Fallback: if the service is unreachable/5xx or rejects the code, offline `unlockCodeEntries` (Option A) are still checked. Unreachable does not count towards local rate limiting.
+- Default remains `policy_list`; nothing changes on devices until policy sets geco_endpoint + endpoint.
+
 ## 1.3.2 (staging, unreleased) - 2026-10-22
 - Generic credential-harvesting: the "Long base64url tracking ID in query string" signal now ignores the HubSpot tracking parameters `_hsenc`, `_hsmi`, `__hsfp`, `__hssc`, `__hstc`, `hsCtaTracking` (exact names, case-insensitive) **and only when the value has the HubSpot shape**: `_hsenc` must start with `p2ANqtz`; `_hsmi`/`__hsfp`/`__hssc`/`__hstc` must be numeric; `hsCtaTracking` hex/UUID. Other parameters and all other signals unchanged. Mirrored in content-early.js. Trigger: TK-15345 (FirstOrder / app.thecosechouse.co.uk HubSpot email link).
 
