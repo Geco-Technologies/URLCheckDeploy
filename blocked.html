@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Blocked - Check</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #f77f00 0%, #003049 100%);
+        color: #003049;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border: 2px solid #d1d5db;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        font-size: 40px;
+        color: #6b7280;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 600;
+        color: #f77f00;
+        margin-bottom: 16px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+        color: #6b7280;
+        margin-bottom: 30px;
+        line-height: 1.5;
+      }
+
+      .reason {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: left;
+      }
+
+      .reason-title {
+        font-weight: 600;
+        color: #991b1b;
+        margin-bottom: 8px;
+      }
+
+      .reason-text {
+        color: #7f1d1d;
+        line-height: 1.5;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary {
+        background: #f77f00;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #e56f00;
+      }
+
+      .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+      }
+
+      .btn-secondary:hover {
+        background: #e5e7eb;
+      }
+
+      .details {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        text-align: left;
+      }
+
+      .details-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+      }
+
+      .details-list {
+        list-style: none;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .details-list li {
+        padding: 4px 0;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Technical Details Collapsible */
+      .technical-details {
+        margin-top: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .technical-details-header {
+        background: #f9fafb;
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #374151;
+        user-select: none;
+        transition: background-color 0.2s ease;
+      }
+
+      .technical-details-header:hover {
+        background: #f3f4f6;
+      }
+
+      .technical-details-icon {
+        font-size: 18px;
+        transition: transform 0.2s ease;
+      }
+
+      .technical-details-content {
+        padding: 0 16px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+      }
+
+      .technical-details.expanded .technical-details-content {
+        max-height: 2000px;
+        padding: 16px;
+      }
+
+      .technical-details.expanded .technical-details-icon {
+        transform: rotate(180deg);
+      }
+
+      .tech-section {
+        margin-bottom: 16px;
+      }
+
+      .tech-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .tech-section-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .tech-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .tech-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .tech-badge.high { background: #fef2f2; color: #dc2626; }
+      .tech-badge.medium { background: #fef3c7; color: #d97706; }
+      .tech-badge.low { background: #f0fdf4; color: #16a34a; }
+      .tech-badge.critical { background: #450a0a; color: #fecaca; }
+
+      .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        font-size: 12px;
+        color: #9ca3af;
+      }
+
+      .company-logo {
+        max-width: 80px;
+        max-height: 80px;
+        width: auto;
+        height: auto;
+        border-radius: 50%;
+        object-fit: contain;
+        background: white;
+        padding: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+
+      .icon-container {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 30px 20px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        .subtitle {
+          font-size: 16px;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+
+      }
+
+      /* Anti-flicker: Hide content until fully loaded */
+      body.loading .container {
+          opacity: 0;
+      }
+
+      .container {
+          opacity: 1;
+          transition: opacity 0.2s ease-in;
+      }
+
+      .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          font-size: 12px;
+          color: #9ca3af;
+      }
+
+
+      /* Phase 1b — Temporary unlock (secondary; not a Continue CTA) */
+      .unlock-panel {
+        margin-top: 28px;
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #f8fafc;
+        text-align: left;
+      }
+      .unlock-panel h2 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+      }
+      .unlock-panel p {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+      .unlock-panel input[type="text"] {
+        width: 100%;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      .unlock-panel .unlock-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .unlock-panel .btn-unlock {
+        background: #475569;
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .unlock-panel .btn-unlock:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .unlock-panel .btn-helpdesk {
+        background: transparent;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .unlock-panel .unlock-error {
+        color: #b91c1c;
+        font-size: 13px;
+        margin-top: 8px;
+        display: none;
+      }
+      .unlock-panel .unlock-error.visible { display: block; }
+      .unlock-panel.disabled { opacity: 0.55; pointer-events: none; }
+
+    </style>
+  </head>
+  <body class="loading">
+    <div class="container">
+      <div class="icon-container">
+        <img id="customLogo" class="company-logo" style="display: none; max-width: 80px; max-height: 80px; border-radius: 50%; object-fit: contain;" alt="Company Logo">
+        <div id="defaultIcon" class="icon material-icons">security</div>
+      </div>
+
+      <h1>Access Blocked</h1>
+      <p class="subtitle">
+        This website has been blocked by your organization's security policy
+      </p>
+
+      <div class="reason">
+        <div class="reason-title">Reason for blocking:</div>
+        <div class="reason-text" id="blockReason">
+          This website looks like it has tried to steal your login credentials,
+          to prevent you from logging in we've blocked access.
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="goBackBtn">Go Back</button>
+        <button class="btn btn-secondary" id="contactAdminBtn">
+          Contact Admin
+        </button>
+        <button class="btn btn-secondary" id="reportFalsePositiveBtn" style="display: none;">
+          Report False Positive
+        </button>
+      </div>
+
+      
+      <div class="unlock-panel" id="unlockPanel" style="display: none;" hidden>
+        <h2>Temporary unlock</h2>
+        <p id="unlockHelpdeskCopy">
+          This page was blocked by Unite Networks URLCheck. If you have a
+          <strong>business need</strong> to open it, contact
+          <strong>Unite helpdesk</strong> and ask for an unlock code. Do not
+          enter codes from email or chat you did not request.
+        </p>
+        <label for="unlockCodeInput" style="font-size:12px;color:#64748b;display:block;margin-bottom:4px;">Unlock code</label>
+        <input
+          type="text"
+          id="unlockCodeInput"
+          name="unlock_code"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="Enter helpdesk unlock code"
+        />
+        <div class="unlock-actions">
+          <button type="button" class="btn-unlock" id="unlockSubmitBtn" disabled>
+            Unlock this site
+          </button>
+          <button type="button" class="btn-helpdesk" id="unlockHelpdeskBtn">
+            Request unlock from Unite helpdesk
+          </button>
+        </div>
+        <div class="unlock-error" id="unlockError" role="alert"></div>
+      </div>
+
+      <div class="details">
+        <div class="details-title">Block Details</div>
+        <ul class="details-list">
+          <li>
+            <span>URL:</span>
+            <span id="blockedUrl">--</span>
+          </li>
+          <li>
+            <span>Category:</span>
+            <span id="threatCategory">Security Threat</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="technical-details" id="technicalDetails">
+        <div class="technical-details-header">
+          <span>Technical Details</span>
+          <span class="technical-details-icon material-icons">expand_more</span>
+        </div>
+        <div class="technical-details-content">
+          <div class="tech-section">
+            <div class="tech-section-title">Detection Scores</div>
+            <div class="tech-item">
+              <span>Legitimacy Score:</span>
+              <span id="techScore">--</span>
+            </div>
+            <div class="tech-item">
+              <span>Threshold:</span>
+              <span id="techThreshold">--</span>
+            </div>
+          </div>
+
+          <div class="tech-section">
+            <div class="tech-section-title">Threat Analysis</div>
+            <div class="tech-item">
+              <span>Indicators Found:</span>
+              <span id="techIndicatorCount">--</span>
+            </div>
+            <div class="tech-item">
+              <span>Highest Severity:</span>
+              <span id="techSeverity">--</span>
+            </div>
+            <div class="tech-item">
+              <span>Detection Method:</span>
+              <span id="techDetectionMethod">--</span>
+            </div>
+          </div>
+
+          <div class="tech-section" id="phishingIndicatorsSection">
+            <div class="tech-section-title">Phishing Indicators Detected</div>
+            <div id="techPhishingIndicators" style="font-size: 12px; color: #6b7280;">
+              <div style="font-style: italic; color: #9ca3af;">Loading...</div>
+            </div>
+          </div>
+
+          <div class="tech-section">
+            <div class="tech-section-title">Page Information</div>
+            <div class="tech-item">
+              <span>Page Title:</span>
+              <span id="techPageTitle">--</span>
+            </div>
+            <div class="tech-item">
+              <span>User Agent:</span>
+              <span id="techUserAgent" style="font-size: 11px; word-break: break-all;">--</span>
+            </div>
+            <div class="tech-item">
+              <span>Timestamp:</span>
+              <span id="techTimestamp">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div id="companyBranding">
+          Protected by <strong id="companyName">Check</strong>
+        </div>
+        <div style="margin-top: 8px">
+          For support, contact your IT administrator
+        </div>
+      </div>
+    </div>
+
+    <script src="scripts/blocked.js"></script>
+  </body>
+</html>

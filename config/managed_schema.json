@@ -1,0 +1,404 @@
+{
+  "type": "object",
+  "properties": {
+    "showNotifications": {
+      "title": "Show Notifications",
+      "description": "Display security notifications and warnings",
+      "type": "boolean",
+      "default": true
+    },
+    "enableValidPageBadge": {
+      "title": "Show Valid Page Badge",
+      "description": "Display validation badge on legitimate Microsoft login pages",
+      "type": "boolean",
+      "default": true
+    },
+    "validPageBadgeTimeout": {
+      "title": "Valid Page Badge Timeout (seconds)",
+      "description": "Auto-dismiss timeout for the valid page badge in seconds. Set to 0 for no timeout (badge stays visible until manually dismissed).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 300,
+      "default": 5
+    },
+    "enablePageBlocking": {
+      "title": "Page Blocking Enabled",
+      "description": "Enable blocking of malicious pages",
+      "type": "boolean",
+      "default": true
+    },
+    "enableCippReporting": {
+      "title": "CIPP Reporting Enabled",
+      "description": "Enable reporting to CIPP server",
+      "type": "boolean",
+      "default": false
+    },
+    "cippServerUrl": {
+      "title": "CIPP Server URL",
+      "description": "Base URL for CIPP reporting server",
+      "type": "string",
+      "format": "uri",
+      "default": ""
+    },
+    "cippTenantId": {
+      "title": "CIPP Tenant ID/Domain",
+      "description": "Tenant identifier to include with CIPP alerts for multi-tenant environments",
+      "type": "string",
+      "default": ""
+    },
+    "customRulesUrl": {
+      "title": "Custom Rules URL",
+      "description": "URL to fetch custom detection rules from",
+      "type": "string",
+      "format": "uri",
+      "default": ""
+    },
+    "updateInterval": {
+      "title": "Update Interval (hours)",
+      "description": "How often to update detection rules in hours",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 168,
+      "default": 24
+    },
+    "urlAllowlist": {
+      "title": "URL Allowlist (URLs with wildcards or Regex)",
+      "description": "Array of URL patterns or regex patterns to allowlist URLs from detection. Supports simple URLs with * wildcards (e.g., https://google.com/*) or advanced regex patterns.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "title": "URL Pattern or Regex",
+        "description": "URL with wildcards (e.g., https://google.com/*) or regular expression pattern to match URLs that should be allowlisted"
+      },
+      "default": []
+    },
+    "externalAllowlistFeeds": {
+      "title": "External Allowlist Feed URLs",
+      "description": "Array of URLs that return lists of URL patterns to allowlist from detection. Each feed may be a JSON array of strings or plain text (one entry per line). Entries support wildcards (https://example.com/*) or regex patterns.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "title": "Feed URL"
+      },
+      "default": []
+    },
+    "externalBlocklistFeeds": {
+      "title": "External Blocklist Feed URLs",
+      "description": "Array of URLs that return lists of URL patterns to always block. Supports the same JSON array and plain-text formats as allowlist feeds. Entries are checked before any other analysis and trigger the block page immediately.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "title": "Feed URL"
+      },
+      "default": []
+    },
+    "feedsUpdateInterval": {
+      "title": "External Feeds Update Interval (hours)",
+      "description": "How often to refresh external allowlist and blocklist feeds",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 168,
+      "default": 6
+    },
+    "enableDebugLogging": {
+      "title": "Debug Logging Enabled",
+      "description": "Enable debug logging for troubleshooting",
+      "type": "boolean",
+      "default": false
+    },
+    "genericWebhook": {
+      "title": "Generic Webhook",
+      "description": "Generic webhook configuration for sending detection events to custom endpoint",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "description": "Enable generic webhook",
+          "type": "boolean",
+          "default": false
+        },
+        "url": {
+          "title": "Webhook URL",
+          "description": "The URL to send webhook payloads to",
+          "type": "string",
+          "format": "uri",
+          "default": ""
+        },
+        "authorizationHeader": {
+          "title": "Authorization Header",
+          "description": "Full Authorization header value e.g. \"Bearer …\" (or empty)",
+          "type": "string",
+          "default": ""
+        },
+        "events": {
+          "title": "Event Types",
+          "description": "Array of event types to send to this webhook",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "detection_alert",
+              "false_positive_report",
+              "page_blocked",
+              "rogue_app_detected",
+              "threat_detected",
+              "validation_event",
+              "unlock_attempt"
+            ]
+          },
+          "default": []
+        }
+      }
+    },
+    "customBranding": {
+      "title": "Custom Branding",
+      "description": "Custom branding configuration for white labeling",
+      "type": "object",
+      "properties": {
+        "companyName": {
+          "title": "Company Name",
+          "description": "Company name to display in the extension",
+          "type": "string",
+          "default": ""
+        },
+        "productName": {
+          "title": "Product Name",
+          "description": "Custom name for the extension",
+          "type": "string",
+          "default": ""
+        },
+        "supportEmail": {
+          "title": "Support Email",
+          "description": "Email address for user support",
+          "type": "string",
+          "format": "email",
+          "default": ""
+        },
+        "supportUrl": {
+          "title": "Support URL",
+          "description": "URL opened by the popup Support link",
+          "type": "string",
+          "format": "uri",
+          "default": ""
+        },
+        "privacyPolicyUrl": {
+          "title": "Privacy URL",
+          "description": "URL opened by the popup Privacy link",
+          "type": "string",
+          "format": "uri",
+          "default": ""
+        },
+        "aboutUrl": {
+          "title": "About URL",
+          "description": "URL opened by the popup About link",
+          "type": "string",
+          "format": "uri",
+          "default": ""
+        },
+        "primaryColor": {
+          "title": "Primary Color",
+          "description": "Primary theme color (hex code)",
+          "type": "string",
+          "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+          "default": "#F77F00"
+        },
+        "logoUrl": {
+          "title": "Logo URL",
+          "description": "URL to company logo",
+          "type": "string",
+          "format": "uri",
+          "default": ""
+        }
+      }
+    },
+    "domainSquatting": {
+      "title": "Domain Squatting Detection",
+      "description": "Configuration for domain squatting detection to protect against typosquatting, homoglyphs, and combosquatting attacks. Enable/disable is controlled here (config/policy), and domains are automatically extracted from the URL allowlist.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "description": "Enable or disable domain squatting detection",
+          "type": "boolean",
+          "default": true
+        },
+        "deviationThreshold": {
+          "title": "Deviation Threshold",
+          "description": "Maximum number of character differences (Levenshtein distance) to trigger detection. Lower values are stricter.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 2
+        },
+        "algorithms": {
+          "title": "Detection Algorithms",
+          "description": "Enable or disable specific detection algorithms",
+          "type": "object",
+          "properties": {
+            "levenshtein": {
+              "title": "Levenshtein Distance",
+              "description": "Detect domains with small character differences",
+              "type": "boolean",
+              "default": true
+            },
+            "homoglyph": {
+              "title": "Homoglyph Detection",
+              "description": "Detect confusable characters (e.g., 'a' vs '\u0430')",
+              "type": "boolean",
+              "default": true
+            },
+            "typosquat": {
+              "title": "Typosquatting Detection",
+              "description": "Detect common typing mistakes and character swaps",
+              "type": "boolean",
+              "default": true
+            },
+            "combosquat": {
+              "title": "Combosquatting Detection",
+              "description": "Detect domains with added prefixes/suffixes",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "protectedDomains": {
+          "title": "Additional Protected Domains",
+          "description": "OPTIONAL: Additional domains to protect beyond those automatically extracted from the URL allowlist. Normally you should just add domains to the URL allowlist instead.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Domain",
+            "description": "Domain name to protect (e.g., 'company.com')"
+          },
+          "default": []
+        },
+        "Action": {
+          "title": "Action",
+          "description": "Action to take when domain squatting is detected",
+          "type": "string",
+          "enum": [
+            "block",
+            "warn",
+            "log"
+          ],
+          "default": "block"
+        },
+        "logDetections": {
+          "title": "Log Detections",
+          "description": "Log all domain squatting detections to activity log",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "enableDeviceCodePhishingHeuristics": {
+      "title": "Enable Device-Code Phishing Heuristics",
+      "description": "Detect lookalike and instructional device-code phishing pages (Phase 1). Warn or block by confidence. Does not weaken trusted Microsoft login paths.",
+      "type": "boolean",
+      "default": true
+    },
+    "hardBlockLegitimateDeviceLogin": {
+      "title": "Hard-Block Legitimate Microsoft Device Login URIs",
+      "description": "Hard-block browser verification URIs such as microsoft.com/devicelogin and aka.ms/devicelogin. Escape hatch is helpdesk unlock code only. Does not block Entra OAuth deviceauth/token API endpoints.",
+      "type": "boolean",
+      "default": true
+    },
+    "enableUnlockCodes": {
+      "title": "Enable Block-Page Unlock Codes",
+      "description": "Allow helpdesk-issued unlock codes on the block page (Phase 1b Option A). No static master PIN; no permanent Continue-anyway.",
+      "type": "boolean",
+      "default": true
+    },
+    "unlockValidationMode": {
+      "title": "Unlock Validation Mode",
+      "description": "policy_list = offline hash check against unlockCodeEntries; geco_endpoint = reserved; off = disabled.",
+      "type": "string",
+      "enum": [
+        "policy_list",
+        "geco_endpoint",
+        "off"
+      ],
+      "default": "policy_list"
+    },
+    "unlockCodeEntries": {
+      "title": "Unlock Code Entries (hashed)",
+      "description": "Helpdesk-issued unlock codes as salted SHA-256 hashes. Never store plaintext codes here.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "codeId": {
+            "type": "string",
+            "title": "Code ID"
+          },
+          "salt": {
+            "type": "string",
+            "title": "Salt"
+          },
+          "codeHash": {
+            "type": "string",
+            "title": "SHA-256 hex of salt:CODE"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Bound origin (scheme://host[:port])"
+          },
+          "codeExpiresAt": {
+            "type": "string",
+            "title": "ISO-8601 redeem expiry"
+          },
+          "unlockTtlSeconds": {
+            "type": "integer",
+            "title": "Grant TTL seconds after redeem",
+            "minimum": 60,
+            "maximum": 86400
+          },
+          "singleUse": {
+            "type": "boolean",
+            "title": "Single-use on redeem",
+            "default": true
+          }
+        }
+      },
+      "default": []
+    },
+    "unlockDefaultTtlSeconds": {
+      "title": "Default Unlock Grant TTL (seconds)",
+      "description": "How long an origin stays unlocked after a successful code redeem. Default 14400 (4 hours).",
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 86400,
+      "default": 14400
+    },
+    "unlockMaxAttempts": {
+      "title": "Unlock Max Wrong Attempts",
+      "description": "Wrong guesses per origin before cooldown.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "default": 5
+    },
+    "unlockAttemptWindowSeconds": {
+      "title": "Unlock Attempt Window (seconds)",
+      "description": "Sliding window for counting wrong unlock attempts. Default 900 (15 minutes).",
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 86400,
+      "default": 900
+    },
+    "unlockHelpdeskMessage": {
+      "title": "Unlock Helpdesk Message",
+      "description": "Shown on the block page Temporary unlock panel.",
+      "type": "string",
+      "default": "Contact Unite helpdesk (phone/Teams) and ask for an unlock code. Do not enter codes from unsolicited email or chat."
+    },
+    "enableClickFixHeuristics": {
+      "title": "Enable ClickFix Heuristics",
+      "description": "Phase 3 flag only. Default false. ClickFix DOM/clipboard detectors are NOT implemented in this release.",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

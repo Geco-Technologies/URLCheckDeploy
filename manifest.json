@@ -1,0 +1,97 @@
+{
+  "manifest_version": 3,
+  "name": "Check by Unite Networks",
+  "version": "1.3.1",
+  "description": "Protect against phishing attacks targeting Microsoft 365 login pages with enterprise-grade detection",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "webNavigation",
+    "scripting",
+    "webRequest",
+    "declarativeNetRequest",
+    "alarms",
+    "identity",
+    "identity.email"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "scripts/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file:///*/*"
+      ],
+      "js": [
+        "scripts/browser-polyfill-inline.js",
+        "scripts/content-early.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file:///*/*"
+      ],
+      "js": [
+        "scripts/browser-polyfill-inline.js",
+        "scripts/device-code-heuristics-content.js",
+        "scripts/content.js"
+      ],
+      "css": [
+        "styles/content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Check",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "config/*",
+        "rules/*",
+        "images/*",
+        "blocked.html",
+        "scripts/utils/logger.js",
+        "scripts/blocked.js",
+        "scripts/browser-polyfill.js",
+        "scripts/browser-polyfill-inline.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;"
+  },
+  "storage": {
+    "managed_schema": "config/managed_schema.json"
+  }
+}

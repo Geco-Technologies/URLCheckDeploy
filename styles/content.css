@@ -1,0 +1,335 @@
+/**
+ * Check - Content Script Styles
+ * Styles for overlays, notifications, and page modifications
+ */
+
+/* CSS Variables for theming */
+:root {
+  --check-primary-color: #F77F00;
+  --check-primary-hover: #E56F00;
+}
+
+/* Main notification styles */
+.check-notification {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 999999 !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  padding: 16px 20px !important;
+  max-width: 380px !important;
+  font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  animation: check-slide-up 0.3s ease-out !important;
+}
+
+.check-notification.error {
+  border-left: 4px solid #003049 !important;
+  background: #EBF0DF !important;
+}
+
+.check-notification.warning {
+  border-left: 4px solid #d97706 !important;
+  background: #fffbeb !important;
+}
+
+.check-notification.info {
+  border-left: 4px solid #005C63 !important;
+  background: #EBF0DF !important;
+}
+
+.check-notification.success {
+  border-left: 4px solid #005C63 !important;
+  background: #EBF0DF !important;
+}
+
+.check-notification .title {
+  font-weight: 600 !important;
+  margin-bottom: 4px !important;
+  color: #111827 !important;
+}
+
+.check-notification .message {
+  color: #374151 !important;
+  margin: 0 !important;
+}
+
+.check-notification .close-btn {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: none !important;
+  border: none !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  padding: 4px !important;
+}
+
+.check-notification .close-btn:hover {
+  color: #374151 !important;
+}
+
+/* Block overlay styles */
+.check-block-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.check-block-content {
+  background: white !important;
+  padding: 40px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  max-width: 500px !important;
+  text-align: center !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.check-block-content h1 {
+  color: #dc2626 !important;
+  margin: 0 0 20px 0 !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+}
+
+.check-block-content p {
+  color: #374151 !important;
+  margin: 0 0 24px 0 !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+.check-block-content button {
+  background: var(--check-primary-color) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: background-color 0.2s !important;
+}
+
+.check-block-content button:hover {
+  background: var(--check-primary-hover) !important;
+}
+
+.check-block-content .secondary-btn {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  margin-left: 12px !important;
+}
+
+.check-block-content .secondary-btn:hover {
+  background: #e5e7eb !important;
+  color: #1f2937 !important;
+}
+
+/* Warning overlay styles */
+.check-warning-overlay {
+  position: fixed !important;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  padding: 10px 16px !important;
+  border-radius: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  z-index: 2147483647 !important;
+  font-family: system-ui, 'Segoe UI', Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  animation: check-slide-up 0.3s ease-out !important;
+  border-bottom: 2px solid #a00 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.check-warning-content {
+  flex: 1 !important;
+}
+
+.check-warning-close {
+  background: none !important;
+  border: none !important;
+  color: white !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin-left: 16px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.check-warning-close:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Banner dismiss button (inline styled) */
+#ms365-warning-banner button:hover {
+  background: rgba(255,255,255,0.3) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Top warning banner variant */
+.check-warning-overlay.top-banner,
+.check-warning-overlay:not(.bottom-notification) {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  text-align: center !important;
+}
+
+/* Bottom notification variant */
+.check-warning-overlay.bottom-notification {
+  bottom: 20px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  background: #fbbf24 !important;
+  color: #92400e !important;
+  border-radius: 8px !important;
+  border-bottom: none !important;
+}
+
+/* Suspicious element highlighting */
+.check-suspicious {
+  outline: 2px dashed #F77F00 !important;
+  outline-offset: 2px !important;
+  background-color: rgba(247, 127, 0, 0.1) !important;
+}
+
+.check-hidden {
+  display: none !important;
+}
+
+
+
+/* Animations */
+@keyframes check-slide-up {
+  from {
+    transform: translateY(100%) !important;
+    opacity: 0 !important;
+  }
+  to {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+}
+
+@keyframes check-fade-in {
+  from {
+    opacity: 0 !important;
+  }
+  to {
+    opacity: 1 !important;
+  }
+}
+
+/* Security badge */
+.check-security-badge {
+  position: fixed !important;
+  right: 8px !important;
+  top: 8px !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  animation: check-fade-in 0.5s ease-out !important;
+}
+
+.check-security-badge img {
+  height: 40px !important;
+  width: 40px !important;
+  object-fit: contain !important;
+  opacity: 0.9 !important;
+}
+
+.check-security-badge div {
+  margin-top: 4px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  color: #fff !important;
+  padding: 4px 6px !important;
+  border-radius: 6px !important;
+  font: 12px system-ui !important;
+  display: inline-block !important;
+}
+
+.check-security-badge.warning {
+  background: #d97706 !important;
+}
+
+.check-security-badge.error {
+  background: #dc2626 !important;
+  animation: check-pulse 2s infinite !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .check-notification {
+    bottom: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: none !important;
+  }
+
+  .check-block-content {
+    margin: 20px !important;
+    padding: 30px 20px !important;
+  }
+
+
+
+  .check-warning-overlay {
+    left: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .check-notification {
+    border-width: 2px !important;
+  }
+
+  .check-block-content {
+    border-width: 2px !important;
+  }
+
+  .check-suspicious {
+    outline-width: 3px !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .check-notification,
+  .check-warning-overlay,
+  .check-security-badge {
+    animation: none !important;
+  }
+}
+

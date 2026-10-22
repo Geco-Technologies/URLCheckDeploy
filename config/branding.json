@@ -1,0 +1,157 @@
+{
+  "companyName": "Unite Networks",
+  "productName": "URLCheck",
+  "logoUrl": "images/icon48.png",
+  "supportUrl": "",
+  "privacyPolicyUrl": "",
+  "aboutUrl": "",
+  "version": "1.1.0",
+  "description": "Protect against phishing attacks targeting Microsoft 365 login pages and other bad sites with enterprise-grade detection",
+  "branding": {
+    "primaryColor": "#7C2FC9",
+    "primaryHover": "#6B27AD",
+    "primaryLight": "rgba(124, 47, 201, 0.1)",
+    "primaryDark": "#5E2299",
+    "secondaryColor": "#1E0A3C",
+    "secondaryHover": "#2D1052",
+    "secondaryLight": "rgba(30, 10, 60, 0.1)",
+    "secondaryDark": "#130625",
+    "accentColor": "#9B59D0",
+    "successColor": "#16A34A",
+    "warningColor": "#F59E0B",
+    "errorColor": "#DC2626",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#C4B5FD",
+    "textMuted": "#9CA3AF",
+    "textInverse": "#1E0A3C",
+    "bgPrimary": "#1E0A3C",
+    "bgSecondary": "rgba(124, 47, 201, 0.05)",
+    "bgSurface": "rgba(124, 47, 201, 0.03)",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "borderHover": "rgba(124, 47, 201, 0.3)"
+  },
+  "assets": {
+    "logoUrl": "images/icon48.png",
+    "iconUrl": "images/icon32.png",
+    "faviconUrl": "images/icon16.png",
+    "bannerUrl": "images/banner.png",
+    "screenshotUrls": [
+      "images/screenshot1.png",
+      "images/screenshot2.png",
+      "images/screenshot3.png"
+    ]
+  },
+  "customization": {
+    "showCompanyBranding": true,
+    "allowUserCustomization": true,
+    "enableWhiteLabeling": true,
+    "customCssEnabled": true,
+    "customIconsEnabled": true
+  },
+  "features": {
+    "welcomeMessage": "Welcome to URLCheck, Unite Networks' Microsoft 365 Phishing Protection - Safeguard Your Organization",
+    "tagline": "Advanced phishing detection for Microsoft 365 login pages by Unite Networks",
+    "securityBadgeText": "Protected by Unite Networks",
+    "blockedPageTitle": "Phishing Attempt Blocked by Unite Networks",
+    "blockedPageMessage": "This page appears to be a phishing attempt targeting Microsoft 365 credentials. Unite Networks has blocked access to protect your organization."
+  },
+  "customText": {
+    "extensionDescription": "URLCheck provides enterprise-grade detection and blocking of phishing attempts targeting Microsoft 365 login pages, with comprehensive policy management and audit capabilities.",
+    "securityFeatures": [
+      "Real-time Microsoft 365 phishing detection",
+      "Advanced login page verification",
+      "Cryptographic verification badges",
+      "Enterprise policy enforcement",
+      "Comprehensive security audit logging",
+      "Custom detection rules engine"
+    ],
+    "enterpriseFeatures": [
+      "Group Policy (GPO) support",
+      "Microsoft Intune integration",
+      "Centralized management console",
+      "Security compliance reporting",
+      "Custom phishing detection rules",
+      "24/7 enterprise security support"
+    ]
+  },
+  "socialMedia": {
+    "twitter": "https://twitter.com/unitenetworks",
+    "linkedin": "https://linkedin.com/company/unitenetworks",
+    "youtube": "",
+    "github": ""
+  },
+  "whiteLabel": {
+    "enabled": true,
+    "allowCustomColors": true,
+    "allowCustomLogos": true,
+    "allowCustomText": true,
+    "allowCustomIcons": true,
+    "allowCustomCss": true,
+    "preserveAttribution": false,
+    "customizableElements": [
+      "extension_name",
+      "company_name",
+      "logo",
+      "colors",
+      "contact_info",
+      "support_links",
+      "custom_css"
+    ]
+  },
+  "licensing": {
+    "licenseKey": "",
+    "licensedTo": "",
+    "licenseType": "enterprise",
+    "licenseExpiry": null,
+    "maxUsers": null,
+    "features": [
+      "unlimited_users",
+      "white_labeling",
+      "enterprise_support",
+      "compliance_reporting",
+      "custom_rules",
+      "api_access"
+    ]
+  },
+  "deployment": {
+    "supportedPlatforms": [
+      "Chrome",
+      "Chromium",
+      "Microsoft Edge",
+      "Brave",
+      "Opera"
+    ],
+    "minimumVersion": "88",
+    "manifestVersion": 3,
+    "deploymentMethods": [
+      "Group Policy (GPO)",
+      "Microsoft Intune",
+      "Chrome Enterprise",
+      "Manual Installation"
+    ]
+  },
+  "analytics": {
+    "enabled": false,
+    "trackingId": "",
+    "events": [
+      "extension_installed",
+      "threat_blocked",
+      "page_scanned",
+      "settings_changed"
+    ],
+    "anonymizeData": true,
+    "respectDoNotTrack": true
+  },
+  "updates": {
+    "autoUpdateEnabled": true,
+    "updateChannel": "stable",
+    "updateURLCheckInterval": 86400000
+  },
+  "metadata": {
+    "created": "2024-01-01T00:00:00Z",
+    "modified": "2026-06-01T00:00:00Z",
+    "author": "Unite Networks",
+    "maintainer": "Unite Networks",
+    "schema_version": "1.0"
+  }
+}

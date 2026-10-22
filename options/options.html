@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check - Settings</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="options-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="../images/icon48.png" alt="Check Logo" class="sidebar-logo" id="sidebarLogo">
+                            <div class="sidebar-title">
+                <h2 id="sidebarTitle">Check</h2>
+            </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><a href="#general" class="menu-item active" data-section="general">
+                    <span class="menu-icon material-icons">settings</span>
+                    <span class="menu-text">General</span>
+                </a></li>
+                <li><a href="#detection" class="menu-item" data-section="detection">
+                    <span class="menu-icon material-icons">search</span>
+                    <span class="menu-text">Detection Rules</span>
+                </a></li>
+                <li><a href="#logs" class="menu-item" data-section="logs">
+                    <span class="menu-icon material-icons">assignment</span>
+                    <span class="menu-text">Activity Logs</span>
+                </a></li>
+                <li><a href="#branding" class="menu-item" data-section="branding">
+                    <span class="menu-icon material-icons">palette</span>
+                    <span class="menu-text">Branding</span>
+                </a></li>
+                <li><a href="#about" class="menu-item" data-section="about">
+                    <span class="menu-icon material-icons">info</span>
+                    <span class="menu-text">About</span>
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-mobile-toggle">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    <div class="header-mobile-logo">
+                        <img src="../images/icon48.png" alt="Check Logo" class="mobile-logo" id="mobileLogo">
+                        <span class="mobile-logo-text" id="mobileLogoText">Check</span>
+                    </div>
+                </div>
+                <div class="header-title-section">
+                    <h1 id="pageTitle">General Settings</h1>
+                    <p class="header-subtitle" id="pageSubtitle">Configure basic phishing protection behavior and detection features</p>
+                    <div class="policy-badge" id="policyBadge" style="display: none;">
+                        <span class="material-icons">business</span>
+                        <span class="badge-text">Managed by Policy</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="darkModeToggle" title="Toggle Dark Mode">
+                        <span class="material-icons" id="darkModeIcon">dark_mode</span>
+                    </button>
+                    <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+                </div>
+            </header>
+
+            <!-- Mobile Title Section (visible only on mobile) -->
+            <div class="mobile-title-section">
+                <h1 id="mobileTitleText">General Settings</h1>
+                <p class="header-subtitle" id="mobileSubtitleText">Configure basic phishing protection behavior and detection features</p>
+            </div>
+
+            <!-- General Section -->
+            <section id="general-section" class="settings-section active">
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <h3>Extension Settings</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="enablePageBlocking" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Enable Page Blocking
+                            </label>
+                            <p class="setting-description">Block access to detected phishing pages</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="forceMainThreadPhishingProcessing" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Force Main Thread Phishing Processing
+                            </label>
+                            <p class="setting-description">For debugging: disables background worker and forces phishing detection to run on the main thread (timing and logs will be more accurate, but performance may be reduced).</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="enableCippReporting" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Enable CIPP Reporting
+                            </label>
+                            <p class="setting-description">Send detection events to CIPP server for monitoring</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                CIPP Server URL
+                                <input type="url" id="cippServerUrl" class="setting-input" placeholder="https://your-cipp-server.com">
+                            </label>
+                            <p class="setting-description">URL of your CIPP server for reporting Microsoft 365 logon detections</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Tenant ID/Domain
+                                <input type="text" id="cippTenantId" class="setting-input" placeholder="contoso.onmicrosoft.com or tenant-guid">
+                            </label>
+                            <p class="setting-description">Tenant identifier to include with CIPP alerts for multi-tenant environments</p>
+                        </div>
+
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>Generic Webhook</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="genericWebhookEnabled" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Enable Generic Webhook
+                            </label>
+                            <p class="setting-description">Send events to a custom webhook endpoint</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Webhook URL
+                                <input type="url" id="genericWebhookUrl" class="setting-input" placeholder="https://webhook.example.com/endpoint">
+                            </label>
+                            <p class="setting-description">URL to receive webhook payloads</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">Event Types to Send</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_detection_alert" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Detection Alerts
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_false_positive_report" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    False Positive Reports
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_page_blocked" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Page Blocked
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_rogue_app_detected" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Rogue App Detected
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_domain_squatting_detected" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Domain Squatting Detected
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_threat_detected" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Threat Detected
+                                </label>
+                                <label class="setting-label">
+                                    <input type="checkbox" id="webhookEvent_validation_event" class="setting-checkbox">
+                                    <span class="checkbox-custom"></span>
+                                    Validation Events
+                                </label>
+                            </div>
+                            <p class="setting-description">Select which event types to send to the webhook</p>
+                        </div>
+
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>User Interface</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="showNotifications" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Show Notifications
+                            </label>
+                            <p class="setting-description">Display security notifications and warnings</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="enableValidPageBadge" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Show Valid Page Badge
+                            </label>
+                            <p class="setting-description">Display a verification badge on legitimate Microsoft 365 login pages</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Valid Page Badge Timeout (seconds)
+                                <input type="number" id="validPageBadgeTimeout" class="setting-input" min="0" max="300" step="1" value="5" required>
+                            </label>
+                            <p class="setting-description">Auto-dismiss timeout for the valid page badge in seconds. Set to 0 for no timeout (badge stays visible until manually dismissed).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Detection Section -->
+            <section id="detection-section" class="settings-section">
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <h3>Detection Configuration</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Config URL
+                                <input type="url" id="customRulesUrl" class="setting-input" placeholder="https://raw.githubusercontent.com/CyberDrain/Check/refs/heads/main/rules/detection-rules.json">
+                            </label>
+                            <p class="setting-description">URL to fetch detection configuration from (leave empty for default)</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Update Interval (hours)
+                                <input type="number" id="updateInterval" class="setting-input" min="1" max="168" value="24">
+                            </label>
+                            <p class="setting-description">How often to update detection rules</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                URL Allowlist (Regex or URL with wildcards)
+                                <textarea id="urlAllowlist" class="setting-textarea" rows="6" placeholder="Enter URLs or regex patterns, one per line:&#10;&#10;Simple URLs with wildcards:&#10;https://google.com/*&#10;https://*.microsoft.com/*&#10;&#10;Advanced regex patterns:&#10;^https://trusted\.example\.com/.*"></textarea>
+            </label>
+                            <p class="setting-description">Add URLs or regex patterns to allowlist from detection. Use simple URLs with * wildcards (e.g., https://google.com/*) or advanced regex patterns. These will be added to the exclusion rules without replacing the entire ruleset. <strong>This allowlist also protects the extracted domains from typosquatting, homoglyphs, and other domain squatting attacks.</strong></p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <input type="checkbox" id="domainSquattingEnabled" class="setting-checkbox">
+                                <span class="checkbox-custom"></span>
+                                Enable Domain Squatting Detection
+                            </label>
+                            <p class="setting-description">Enable or disable typosquatting, homoglyph, and combosquatting detection. Protected domains continue to come from detection rules and your URL allowlist.</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-actions">
+                                <button class="btn btn-secondary" id="refreshDetectionRules">
+                                    <span class="material-icons">refresh</span>
+                                    Update Rules Now
+                                </button>
+                            </div>
+                            <p class="setting-description">Manually update detection rules from the remote source</p>
+                        </div>
+                    </div>
+
+                    <!-- External Feeds -->
+                    <div class="setting-group">
+                        <h3>External Feeds</h3>
+                        <p class="setting-description" style="margin-bottom:12px;">
+                            Pull allowlists and blocklists from remote URLs (your own server, threat-intel feeds, etc.).
+                            Feeds are refreshed automatically and checked on every page load before any other analysis.
+                            Each feed may return a JSON array of URL patterns or plain text (one pattern per line; lines starting with <code>#</code> are comments).
+                            Patterns support wildcards (<code>https://example.com/*</code>) or regular expressions.
+                        </p>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Allowlist Feed URLs
+                                <textarea id="externalAllowlistFeeds" class="setting-textarea" rows="4"
+                                    placeholder="One feed URL per line:&#10;https://your-server.com/feeds/allowlist.json&#10;https://raw.githubusercontent.com/org/repo/main/allowlist.txt"></textarea>
+                            </label>
+                            <p class="setting-description">URLs that serve lists of patterns to <strong>skip detection</strong> for. Entries are merged with the local URL Allowlist above.</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Blocklist Feed URLs
+                                <textarea id="externalBlocklistFeeds" class="setting-textarea" rows="4"
+                                    placeholder="One feed URL per line:&#10;https://your-server.com/feeds/blocklist.json&#10;https://urlhaus.abuse.ch/downloads/text/"></textarea>
+                            </label>
+                            <p class="setting-description">URLs that serve lists of patterns to <strong>always block</strong>, regardless of other rules. Checked first on every page — use for emergency blocks and threat-intel feeds.</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Feeds Update Interval (hours)
+                                <input type="number" id="feedsUpdateInterval" class="setting-input" min="1" max="168" value="6">
+                            </label>
+                            <p class="setting-description">How often to refresh all external feeds in the background</p>
+                        </div>
+
+                        <div class="setting-item" id="feedsStatusItem" style="display:none;">
+                            <div class="setting-label">Feed Status</div>
+                            <div id="feedsStatusDisplay" class="config-display" style="font-size:13px;padding:8px 12px;"></div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-actions">
+                                <button class="btn btn-secondary" id="refreshFeeds">
+                                    <span class="material-icons">sync</span>
+                                    Refresh Feeds Now
+                                </button>
+                            </div>
+                            <p class="setting-description">Force an immediate refresh of all configured feeds</p>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="config-header">
+                            <h3>Configuration Overview</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary small" id="expandCollapseAll">
+                                    <span class="material-icons">unfold_more</span>
+                                    Expand All
+                                </button>
+                                <button class="btn btn-secondary small" id="toggleConfigView">
+                                    <span class="material-icons">code</span>
+                                    Show Raw JSON
+                                </button>
+                            </div>
+                        </div>
+                        <div id="configDisplay" class="config-display">
+                            <div class="config-loading">Loading configuration...</div>
+                            <div id="configSummary" class="config-summary" style="display:none;">
+                                <h4>Phishing Indicators with Code-Driven Logic</h4>
+                                <div id="codeDrivenIndicators"></div>
+                                <h4>Other Key Settings</h4>
+                                <ul id="configKeySettings"></ul>
+                            </div>
+                        </div>
+                        <p class="setting-description">Read-only view of the current detection rules and configuration</p>
+                    </div>
+
+                    <div class="setting-group" id="rulePlaygroundGroup">
+                        <div class="config-header">
+                            <h3>Rule Playground (Beta)</h3>
+                            <button class="btn btn-secondary small" id="loadCurrentRulesBtn" title="Load current cached rules into editor">
+                                <span class="material-icons">download</span>
+                                Load Current
+                            </button>
+                        </div>
+                        <p class="setting-description">Prototype and test detection rules locally. These changes are NOT saved to the extension unless you manually update the rules file.</p>
+                        <div class="playground-grid">
+                            <div class="playground-column">
+                                <label class="setting-label stacked-label">Candidate Rules JSON
+                                    <textarea id="playgroundRulesInput" class="playground-textarea" data-playground-input="true" spellcheck="false" placeholder="Paste a single rule object or an array / partial detection-rules.json fragment..."></textarea>
+                                </label>
+                                <div class="playground-inline-actions">
+                                    <button class="btn btn-secondary" id="validateRulesBtn"><span class="material-icons">check</span> Validate</button>
+                                    <button class="btn btn-secondary" id="sanitizeRulesBtn"><span class="material-icons">cleaning_services</span> Sanitize</button>
+                                    <button class="btn btn-secondary" id="copyRulesBtn"><span class="material-icons">content_copy</span> Copy</button>
+                                </div>
+                            </div>
+                            <div class="playground-column">
+                                <label class="setting-label">Test URL
+                                    <input type="url" id="playgroundTestUrl" class="setting-input" data-playground-input="true" placeholder="https://example.com/phish" />
+                                </label>
+                                <label class="setting-label stacked-label"> Sample HTML (will not fetch live)
+                                    <textarea id="playgroundHtmlInput" class="playground-textarea small" data-playground-input="true" spellcheck="false" placeholder="Paste sample page HTML here to simulate scanning..."></textarea>
+                                </label>
+                                <div class="playground-inline-actions">
+                                    <button class="btn btn-primary" id="runRuleTestBtn"><span class="material-icons">play_arrow</span> Test Rules</button>
+                                    <button class="btn btn-secondary" id="clearPlaygroundBtn"><span class="material-icons">clear</span> Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="playground-results" id="playgroundResults" aria-live="polite">
+                            <div class="playground-placeholder">No test run yet. Paste rules and click Test.</div>
+                        </div>
+                        <p class="setting-description">The playground reuses the same rule matching logic as the content script where possible. Some complex rule types may not be fully simulated.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs-section" class="settings-section">
+                <div class="logs-controls">
+                    <div class="logs-filters">
+                        <label class="setting-label">
+                            <input type="checkbox" id="enableDeveloperConsoleLogging" class="setting-checkbox">
+                            <span class="checkbox-custom"></span>
+                            Developer Mode (enables debug logging)
+                        </label>
+                        <label class="setting-label">
+                            <input type="checkbox" id="simulateEnterpriseMode" class="setting-checkbox">
+                            <span class="checkbox-custom"></span>
+                            Simulate Enterprise Policy Mode (Dev Only)
+                        </label>
+                        <select id="logFilter" class="setting-select" title="Filter activity log entries by type">
+                            <option value="all">All Events</option>
+                            <option value="security">Security Events</option>
+                            <option value="url_access">URL Access</option>
+                            <option value="threat_detected">Threats Detected</option>
+                            <option value="page_scanned">Page Scans</option>
+                            <option value="debug">Debug Events</option>
+                        </select>
+                        <button class="btn btn-primary" id="refreshLogs">Refresh</button>
+                        <button class="btn btn-secondary" id="clearLogs">Clear Logs</button>
+                        <button class="btn btn-secondary" id="exportLogs">Export Logs</button>
+                    </div>
+                </div>
+
+                <div class="logs-container">
+                    <div class="logs-header">
+                        <div class="log-column-header timestamp">Timestamp</div>
+                        <div class="log-column-header event-type">Event Type</div>
+                        <div class="log-column-header url">URL/Domain</div>
+                        <div class="log-column-header threat-level">Threat Level</div>
+                        <div class="log-column-header action">Action Taken</div>
+                        <div class="log-column-header details">Details</div>
+                        <div class="log-column-header expand"></div>
+                    </div>
+                    <div class="logs-list" id="logsList">
+                        <div class="log-entry">
+                            <div class="log-column timestamp">Loading...</div>
+                            <div class="log-column event-type">system</div>
+                            <div class="log-column url">-</div>
+                            <div class="log-column threat-level">-</div>
+                            <div class="log-column action">-</div>
+                            <div class="log-column details">Loading activity logs...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Branding Section -->
+            <section id="branding-section" class="settings-section">
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <h3>Company Information</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Company Name
+                                <input type="text" id="companyName" class="setting-input" placeholder="Your Company Name">
+                            </label>
+                            <p class="setting-description">Company name displayed in the extension</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Product Name
+                                <input type="text" id="productName" class="setting-input" placeholder="Custom Extension Name">
+                            </label>
+                            <p class="setting-description">Custom name for the extension</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Support Email
+                                <input type="email" id="supportEmail" class="setting-input" placeholder="support@yourcompany.com">
+                            </label>
+                            <p class="setting-description">Email address for user support</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Support URL
+                                <input type="url" id="supportUrl" class="setting-input" placeholder="https://support.yourcompany.com">
+                            </label>
+                            <p class="setting-description">URL opened by the popup Support button</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Privacy URL
+                                <input type="url" id="privacyPolicyUrl" class="setting-input" placeholder="https://yourcompany.com/privacy">
+                            </label>
+                            <p class="setting-description">URL opened by the popup Privacy button</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                About URL
+                                <input type="url" id="aboutUrl" class="setting-input" placeholder="https://yourcompany.com/about">
+                            </label>
+                            <p class="setting-description">URL opened by the popup About button (leave empty to use extension About page)</p>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>Visual Customization</h3>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Primary Color
+                                <input type="color" id="primaryColor" class="setting-color" value="#2563eb">
+                            </label>
+                            <p class="setting-description">Main theme color for the extension</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Logo URL
+                                <input type="url" id="logoUrl" class="setting-input" placeholder="https://yourcompany.com/logo.png">
+                            </label>
+                            <p class="setting-description">URL to your company logo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="branding-preview">
+                    <h3>Preview</h3>
+                    <div class="preview-popup" id="brandingPreview">
+                        <div class="preview-header">
+                            <img src="../images/icon32.png" alt="Check Logo" class="preview-logo" id="previewLogo">
+                            <span class="preview-title" id="previewTitle">Check</span>
+                        </div>
+                        <div class="preview-content">
+                            <p>This is how your branding will appear in the extension popup.</p>
+                            <button class="preview-button" id="previewButton">Sample Button</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about-section" class="settings-section">
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <div class="about-split-container">
+                            <div class="about-left-panel">
+                                <h3>About URLCheck</h3>
+                                <div class="company-info">
+                                    <div class="company-logo">
+                                        <img src="../images/icon48.png" alt="URLCheck Logo" class="company-logo-img">
+                                    </div>
+                                    <div class="product-description">
+                                        <p><strong>URLCheck</strong> is an advanced browser extension that provides real-time protection against Microsoft 365 phishing attacks. URLCheck uses sophisticated detection algorithms to identify and block malicious login pages before credentials can be compromised.</p>
+                                        <p>The extension integrates seamlessly with existing security workflows, offering centralized management, comprehensive logging, and CIPP integration for managing multiple Microsoft 365 tenants.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="about-divider"></div>
+
+                            <div class="about-right-panel">
+                                <h3>About Unite Networks</h3>
+                                <div class="company-info">
+                                    <div class="company-logo">
+                                        <img src="../images/icon128.png" alt="Unite Networks" class="company-logo-img">
+                                    </div>
+                                    <div class="company-description">
+                                        <p><strong>Unite Networks</strong> is a leading provider of Managed Support and Security consultancy.</p>
+                                        <p>With a focus on innovation, Unite Networks delivers enterprise-grade tools that streamline clients day to day and enhance the security posture.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-section-spacer"></div>
+
+                        <div class="links-grid">
+                                    <a href="https://www.unite-networks.com" target="_blank" class="link-card">
+                                        <div class="link-icon">
+                                            <span class="material-icons">language</span>
+                                        </div>
+                                        <div class="link-content">
+                                            <h4>Unite Networks Website</h4>
+                                            <p>Learn more about our solutions</p>
+                                        </div>
+                                        <span class="material-icons link-arrow">open_in_new</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="version-info-section">
+                            <div class="version-info">
+                                <div class="version-item">
+                                    <span class="version-label">Extension Version:</span>
+                                    <span class="version-value" id="extensionVersion">1.0.0</span>
+                                </div>
+                                <div class="version-item">
+                                    <span class="version-label">Detection Rules Version:</span>
+                                    <span class="version-value" id="rulesVersion">Loading...</span>
+                                </div>
+                                <div class="version-item">
+                                    <span class="version-label">Last Updated:</span>
+                                    <span class="version-value" id="lastUpdated">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="modalOverlay" style="display: none;">
+        <div class="modal">
+            <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+            <p class="modal-message" id="modalMessage">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/browser-polyfill-inline.js"></script>
+    <script src="options.js"></script>
+</body>
+</html>
