@@ -48,13 +48,32 @@
     return false;
   }
 
+  // Value-shape check so an attacker cannot evade the rule just by naming
+  // their tracking parameter "_hsenc" etc. (value = the 40+ char base64url run).
+  //  _hsenc            : HubSpot email token, always starts "p2ANqtz"
+  //  _hsmi/__hs*       : numeric ids/hashes (hub id / message id / fingerprint)
+  //  hsCtaTracking     : UUID(s) — hex + hyphens
+  function isHubSpotTrackingValue(name, value) {
+    const v = String(value || '');
+    switch (name) {
+      case '_hsenc': return v.startsWith('p2ANqtz');
+      case '_hsmi':
+      case '__hsfp':
+      case '__hssc':
+      case '__hstc': return /^\d+$/.test(v);
+      case 'hsctatracking': return /^[0-9a-f-]+$/i.test(v);
+      default: return false;
+    }
+  }
+
   function hasSpearPhishingTrackingId(search) {
     if (!search) return false;
     const pattern = /[?&]([a-z_-]{1,8})=([A-Za-z0-9_\-]{40,})/gi;
     let match;
     while ((match = pattern.exec(search)) !== null) {
       const name = match[1].toLowerCase();
-      if (HUBSPOT_TRACKING_QUERY_PARAMS.has(name)) continue;
+      if (HUBSPOT_TRACKING_QUERY_PARAMS.has(name) &&
+          isHubSpotTrackingValue(name, match[2])) continue;
       if (!SSO_QUERY_PARAMS.has(name)) return true;
     }
     return false;

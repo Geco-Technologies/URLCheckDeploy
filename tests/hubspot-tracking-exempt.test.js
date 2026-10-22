@@ -15,18 +15,25 @@ const ectx={URL,window:{location:{href:''}}}; vm.createContext(ectx);
 vm.runInContext(early.slice(ea,eb)+'\nthis.has=hasSpearPhishingTrackingId;this.quick=quickUrlScore;',ectx);
 const B64='p2ANqtz-8xYz3kQwErTyUiOpAsDfGhJkLzXcVbNm1234567890abcdEFGH_ij';
 const LONG='CJbjp7Snv90lH5CyQwErTyUiOpAsDfGhJkLzXcVbNm12345';
+const DIG='1234567890123456789012345678901234567890123';
 const cases=[
  // [desc, search, expectFlag]
- ['Laura: utm + _hsenc only','?utm_medium=email&_hsenc='+B64+'&utm_source=hs',false],
- ['_hsmi long','?_hsmi='+LONG,false],
- ['__hstc/__hssc/__hsfp long','?__hstc='+LONG+'&__hssc='+LONG+'&__hsfp='+LONG,false],
- ['uppercase _HSENC','?_HSENC='+B64,false],
- ['hsCtaTracking long','?hsCtaTracking='+LONG,false],
+ ['Laura: utm + _hsenc (p2ANqtz) only','?utm_medium=email&_hsenc='+B64+'&utm_source=hs',false],
+ ['real-world _hsenc + _hsmi numeric','?_hsenc='+B64+'&_hsmi=330925143',false],
+ ['_hsenc WITHOUT p2ANqtz prefix flagged','?_hsenc='+LONG,true],
+ ['_hsenc lowercase prefix p2anqtz flagged','?_hsenc=p2anqtz-'+LONG,true],
+ ['_hsmi long numeric exempt','?_hsmi='+DIG,false],
+ ['_hsmi long base64 flagged','?_hsmi='+LONG,true],
+ ['__hstc/__hssc/__hsfp numeric exempt','?__hstc='+DIG+'&__hssc='+DIG+'&__hsfp='+DIG,false],
+ ['__hstc long base64 flagged','?__hstc='+LONG,true],
+ ['__hsfp long base64 flagged','?__hsfp='+LONG,true],
+ ['uppercase _HSENC name w/ p2ANqtz exempt','?_HSENC='+B64,false],
+ ['hsCtaTracking (name >8 chars never matched)','?hsCtaTracking='+LONG,false],
  ['_hsenc plus attacker id= still flagged','?_hsenc='+B64+'&id='+LONG,true],
  ['attacker id= before _hsenc still flagged','?id='+LONG+'&_hsenc='+B64,true],
- ['lookalike name x_hsenc flagged','?x_hsenc='+LONG,true],
- ['lookalike name hsenc (no _) flagged','?hsenc='+LONG,true],
- ['lookalike _hsencx flagged','?_hsencx='+LONG,true],
+ ['lookalike name x_hsenc flagged','?x_hsenc='+B64,true],
+ ['lookalike name hsenc (no _) flagged','?hsenc='+B64,true],
+ ['lookalike _hsencx flagged','?_hsencx='+B64,true],
  ['checkmaster _tok still flagged','?_tok='+LONG,true],
  ['spear id= still flagged','?id='+LONG,true],
  ['SSO code= still exempt','?code='+LONG,false],
@@ -40,8 +47,9 @@ for(const [d,s,exp] of cases){
 }
 // Full URL scoring: rest of URL still judged
 const sc=[
+ ['phish host w/ fake _hsenc (no prefix) keeps tracking points','https://tpio-mail-internalserver.zenviq.vu/?_hsenc='+LONG,(r)=>r.reasons.some(x=>/base64url/.test(x))&&r.score>=90],
  ['Laura URL total score 0','https://app.thecosechouse.co.uk/firstorder.php?utm_medium=email&_hsenc='+B64,(r)=>r.score===0],
- ['phish host w/ _hsenc keeps keyword/hyphen/TLD points','https://tpio-mail-internalserver.zenviq.vu/?_hsenc='+B64,(r)=>r.score>=40&&!r.reasons.some(x=>/base64url/.test(x))],
+ ['phish host w/ real-shape _hsenc keeps keyword/hyphen/TLD points','https://tpio-mail-internalserver.zenviq.vu/?_hsenc='+B64,(r)=>r.score>=40&&!r.reasons.some(x=>/base64url/.test(x))],
  ['phish host w/ id= unchanged (>=90 incl tracking)','https://tpio-mail-internalserver.zenviq.vu/?id='+LONG,(r)=>r.reasons.some(x=>/base64url/.test(x))&&r.score>=90],
  ['phish host _hsenc + id= still gets tracking points','https://tpio-mail-internalserver.zenviq.vu/?_hsenc='+B64+'&id='+LONG,(r)=>r.reasons.some(x=>/base64url/.test(x))],
 ];
