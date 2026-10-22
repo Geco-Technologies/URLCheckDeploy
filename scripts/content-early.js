@@ -34,6 +34,11 @@
     'prompt', 'login_hint', 'domain_hint', 'resource',
   ]);
 
+  // Mirror of HUBSPOT_TRACKING_QUERY_PARAMS in content.js (exact names only).
+  const HUBSPOT_TRACKING_QUERY_PARAMS = new Set([
+    '_hsenc', '_hsmi', '__hsfp', '__hssc', '__hstc', 'hsctatracking',
+  ]);
+
   function hostnameHasKeywordToken(hostname, keyword) {
     const labels = hostname.split('.');
     for (const label of labels) {
@@ -48,7 +53,9 @@
     const pattern = /[?&]([a-z_-]{1,8})=([A-Za-z0-9_\-]{40,})/gi;
     let match;
     while ((match = pattern.exec(search)) !== null) {
-      if (!SSO_QUERY_PARAMS.has(match[1].toLowerCase())) return true;
+      const name = match[1].toLowerCase();
+      if (HUBSPOT_TRACKING_QUERY_PARAMS.has(name)) continue;
+      if (!SSO_QUERY_PARAMS.has(name)) return true;
     }
     return false;
   }

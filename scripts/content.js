@@ -3297,6 +3297,15 @@ if (window.checkExtensionLoaded) {
     'prompt', 'login_hint', 'domain_hint', 'resource', 'nonce_token',
   ]);
 
+  // HubSpot email/CTA tracking parameters. HubSpot marketing mail appends
+  // _hsenc (40+ chars of base64url, e.g. "p2ANqtz-...") to every link, which
+  // otherwise trips the long-tracking-ID rule on legitimate vendor sites.
+  // Exempt ONLY these exact parameter names; every other parameter, and every
+  // other URL / page signal, is still scored normally.
+  const HUBSPOT_TRACKING_QUERY_PARAMS = new Set([
+    '_hsenc', '_hsmi', '__hsfp', '__hssc', '__hstc', 'hsctatracking',
+  ]);
+
   // Known identity providers. Generic harvesting is the wrong detector here —
   // Microsoft impersonation rules still run if the page mimics M365.
   const KNOWN_IDP_HOST_SUFFIXES = [
@@ -3342,6 +3351,7 @@ if (window.checkExtensionLoaded) {
     let match;
     while ((match = pattern.exec(search)) !== null) {
       const name = match[1].toLowerCase();
+      if (HUBSPOT_TRACKING_QUERY_PARAMS.has(name)) continue;
       if (!GENERIC_SSO_QUERY_PARAMS.has(name)) {
         return true;
       }

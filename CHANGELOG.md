@@ -1,3 +1,6 @@
+## 1.3.2 (staging, unreleased) - 2026-10-22
+- Generic credential-harvesting: the "Long base64url tracking ID in query string" signal now ignores the HubSpot tracking parameters `_hsenc`, `_hsmi`, `__hsfp`, `__hssc`, `__hstc`, `hsCtaTracking` (exact names, case-insensitive). Other parameters and all other signals unchanged. Mirrored in content-early.js. Trigger: TK-15345 (FirstOrder / app.thecosechouse.co.uk HubSpot email link).
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

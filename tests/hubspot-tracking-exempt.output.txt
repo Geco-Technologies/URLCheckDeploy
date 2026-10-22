@@ -1,0 +1,19 @@
+PASS Laura: utm + _hsenc only  content=false early=false expect=false
+PASS _hsmi long  content=false early=false expect=false
+PASS __hstc/__hssc/__hsfp long  content=false early=false expect=false
+PASS uppercase _HSENC  content=false early=false expect=false
+PASS hsCtaTracking long  content=false early=false expect=false
+PASS _hsenc plus attacker id= still flagged  content=true early=true expect=true
+PASS attacker id= before _hsenc still flagged  content=true early=true expect=true
+PASS lookalike name x_hsenc flagged  content=true early=true expect=true
+PASS lookalike name hsenc (no _) flagged  content=true early=true expect=true
+PASS lookalike _hsencx flagged  content=true early=true expect=true
+PASS checkmaster _tok still flagged  content=true early=true expect=true
+PASS spear id= still flagged  content=true early=true expect=true
+PASS SSO code= still exempt  content=false early=false expect=false
+PASS short value not flagged  content=false early=false expect=false
+PASS Laura URL total score 0  score=0 reasons=[]
+PASS phish host w/ _hsenc keeps keyword/hyphen/TLD points  score=63 reasons=["Corporate keyword \"mail\" in hostname","Corporate keyword \"internalserver\" in hostname","2 hyphens in hostname","Uncommon TLD \".vu\" with corporate keywords"]
+PASS phish host w/ id= unchanged (>=90 incl tracking)  score=113 reasons=["Long base64url tracking ID in query string (spear-phishing indicator)","Corporate keyword \"mail\" in hostname","Corporate keyword \"internalserver\" in hostname","2 hyphens in hostname","Uncommon TLD \".vu\" with corporate keywords"]
+PASS phish host _hsenc + id= still gets tracking points  score=113 reasons=["Long base64url tracking ID in query string (spear-phishing indicator)","Corporate keyword \"mail\" in hostname","Corporate keyword \"internalserver\" in hostname","2 hyphens in hostname","Uncommon TLD \".vu\" with corporate keywords"]
+failures 0
